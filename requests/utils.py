@@ -11,6 +11,10 @@ that are also useful for external consumption.
 
 import cgi
 import codecs
+try:
+    from collections.abc import Mapping
+except ImportError:
+    from collections import Mapping
 import collections
 import io
 import os
@@ -149,7 +153,7 @@ def to_key_val_list(value):
     if isinstance(value, (str, bytes, bool, int)):
         raise ValueError('cannot encode objects that are not 2-tuples')
 
-    if isinstance(value, collections.Mapping):
+    if isinstance(value, Mapping):
         value = value.items()
 
     return list(value)

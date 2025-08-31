@@ -82,6 +82,31 @@ class RequestsTestCase(unittest.TestCase):
 
         assert request.path_url == '/get/test%20case'
 
+    def test_unicode_method_name(self):
+        """Test that Unicode method names are properly handled."""
+        # This should work without causing UnicodeDecodeError in Python 2.7
+        try:
+            # Try to create unicode string (Python 2 style)
+            unicode_method = u'POST'
+        except NameError:
+            # In Python 3, unicode is just str
+            unicode_method = 'POST'
+        
+        request = requests.Request(unicode_method, httpbin('post'))
+        prepared = request.prepare()
+        
+        # The method should be converted to a proper string type
+        assert prepared.method == 'POST'
+        # The method should be a builtin string type, not unicode
+        from requests.compat import builtin_str
+        assert isinstance(prepared.method, builtin_str)
+        
+        # Test that the method name gets uppercased correctly
+        request2 = requests.Request(u'post', httpbin('post'))
+        prepared2 = request2.prepare() 
+        assert prepared2.method == 'POST'
+        assert isinstance(prepared2.method, builtin_str)
+
     def test_params_are_added_before_fragment(self):
         request = requests.Request('GET',
             "http://example.com/path#fragment", params={"a": "b"}).prepare()
