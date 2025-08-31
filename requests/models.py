@@ -8,6 +8,10 @@ This module contains the primary objects that power Requests.
 """
 
 import collections
+try:
+    from collections.abc import Callable
+except ImportError:
+    from collections import Callable
 import logging
 import datetime
 
@@ -153,10 +157,10 @@ class RequestHooksMixin(object):
         if event not in self.hooks:
             raise ValueError('Unsupported event specified, with event name "%s"' % (event))
 
-        if isinstance(hook, collections.Callable):
+        if isinstance(hook, Callable):
             self.hooks[event].append(hook)
         elif hasattr(hook, '__iter__'):
-            self.hooks[event].extend(h for h in hook if isinstance(h, collections.Callable))
+            self.hooks[event].extend(h for h in hook if isinstance(h, Callable))
 
     def deregister_hook(self, event, hook):
         """Deregister a previously registered hook.
@@ -307,7 +311,7 @@ class PreparedRequest(RequestEncodingMixin, RequestHooksMixin):
         """Prepares the given HTTP method."""
         self.method = method
         if self.method is not None:
-            self.method = self.method.upper()
+            self.method = builtin_str(self.method.upper())
 
     def prepare_url(self, url, params):
         """Prepares the given HTTP URL."""
